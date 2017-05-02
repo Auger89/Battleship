@@ -1,8 +1,7 @@
 package battleship;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import javax.persistence.*;
+import java.util.Set;
 
 /**
  * Created by Auger on 29/04/2017.
@@ -14,15 +13,14 @@ public class Game {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private long id;
-    private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
     private String creationDate;
 
-    // Constructors
-//    public Game() {}
+    @OneToMany(mappedBy="game", fetch=FetchType.EAGER)
+    Set<Participation> participations;
 
-    Game(){
-        LocalDateTime now = LocalDateTime.now();
-        creationDate =  dtf.format(now);
+    // Constructors
+    public Game() {
+        this.creationDate = DateUtil.getDateNow();
     }
 
     // Getters and Setters
@@ -34,15 +32,20 @@ public class Game {
         return creationDate;
     }
 
-    // setCreationDate not working
-    void setCreationDate(long hours) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime modifiedTime = now.plusHours(hours);
-        creationDate =  dtf.format(modifiedTime);
+    public void setCreationDate(String creationDate) {
+        this.creationDate = creationDate;
     }
 
+    // Functions
+    public void modifyCreationDate(int hours) {
+        creationDate =  DateUtil.getDateNowPlusHours(hours);
+    }
+
+    @Override
     public String toString() {
-        return creationDate;
+        return "Game{" +
+                "id=" + id +
+                ", creationDate='" + creationDate + '\'' +
+                '}';
     }
-
 }
