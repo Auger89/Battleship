@@ -40,6 +40,32 @@ public class Participation {
         this.joinDate = DateUtil.getDateNow();
     }
 
+
+    // ToString
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Player{");
+        sb.append("\n");
+        sb.append("id=");
+        sb.append(Id);
+        sb.append("\n");
+        sb.append("joinDate=");
+        sb.append(joinDate);
+        sb.append("\n");
+        sb.append("player=");
+        sb.append(player);
+        sb.append("\n");
+        sb.append("game=");
+        sb.append(game);
+        sb.append("\n");
+        sb.append("}");
+
+        return sb.toString();
+    }
+
+
     // Getters and Setters
     public void setJoinDate(String joinDate) {
         this.joinDate = joinDate;
@@ -69,15 +95,4 @@ public class Participation {
         return game;
     }
 
-    // Functions
-
-    @Override
-    public String toString() {
-        return "Participation{" +
-                "Id=" + Id +
-                ", joinDate='" + joinDate + '\'' +
-                ", player=" + player +
-                ", game=" + game +
-                '}';
-    }
 }

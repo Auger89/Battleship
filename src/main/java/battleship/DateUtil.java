@@ -24,4 +24,5 @@ public class DateUtil {
         date = dtf.format(date2);
         return date;
     }
+
 }

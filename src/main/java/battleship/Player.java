@@ -1,11 +1,12 @@
 package battleship;
 
-import org.springframework.data.annotation.*;
 
 import javax.persistence.*;
 import javax.persistence.Id;
 import java.util.Set;
 import java.util.List;
+import java.lang.String;
+import java.lang.StringBuilder;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -30,6 +31,24 @@ public class Player {
         this.userName = userName;
     }
 
+    // ToString
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Player{");
+        sb.append("\n");
+        sb.append("id=");
+        sb.append(id);
+        sb.append("\n");
+        sb.append("userName=");
+        sb.append(userName);
+        sb.append("\n");
+        sb.append("}");
+
+        return sb.toString();
+    }
+
     // Getters and Setters
     public String getUserName() {
         return userName;
@@ -47,11 +66,4 @@ public class Player {
         return participations.stream().map(sub -> sub.getGame()).collect(toList());
     }
 
-    @Override
-    public String toString() {
-        return "Player{" +
-                "id=" + id +
-                ", userName='" + userName + '\'' +
-                '}';
-    }
 }
