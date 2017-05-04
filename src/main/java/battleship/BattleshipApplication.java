@@ -41,9 +41,9 @@ public class BattleshipApplication {
 			gameRepository.save(g4);
 			// Creating and saving participations
 			Participation part1 = new Participation(p1, g1);
-			Participation part2 = new Participation(p2, g2);
-			Participation part3 = new Participation(p3, g3);
-			Participation part4 = new Participation(p4, g4);
+			Participation part2 = new Participation(p2, g1);
+			Participation part3 = new Participation(p3, g2);
+			Participation part4 = new Participation(p4, g3);
 			participationRepository.save(part1);
 			participationRepository.save(part2);
 			participationRepository.save(part3);
