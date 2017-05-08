@@ -58,6 +58,10 @@ public class Player {
         this.userName = userName;
     }
 
+    public void setParticipations(Set<Participation> participations) {
+        this.participations = participations;
+    }
+
     public long getId() {
         return id;
     }

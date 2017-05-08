@@ -1,12 +1,8 @@
 package battleship;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.JoinColumn;
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by Auger on 01/05/2017.
@@ -20,7 +16,7 @@ public class Participation {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private long Id;
 
-    public String joinDate;
+    private String joinDate;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="player_id")
@@ -30,6 +26,8 @@ public class Participation {
     @JoinColumn(name="game_id")
     private Game game;
 
+    @OneToMany(mappedBy="participation", fetch=FetchType.EAGER)
+    private Set<Ship> ships = new HashSet<>();
 
     // Constructors
     public Participation() {}
@@ -65,6 +63,12 @@ public class Participation {
         return sb.toString();
     }
 
+    // Functions
+    public void addShip(Ship ship) {
+        this.ships.add(ship);
+        ship.setParticipation(this);
+    }
+
 
     // Getters and Setters
     public void setJoinDate(String joinDate) {
@@ -77,6 +81,10 @@ public class Participation {
 
     public void setGame(Game game) {
         this.game = game;
+    }
+
+    public void setShips(Set<Ship> ships) {
+        this.ships = ships;
     }
 
     public long getId() {
@@ -93,6 +101,10 @@ public class Participation {
 
     public Game getGame() {
         return game;
+    }
+
+    public Set<Ship> getShips() {
+        return ships;
     }
 
 }

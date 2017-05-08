@@ -3,8 +3,6 @@ package battleship;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import java.util.Set;
-//import java.util.List;
-//import java.util.stream.Collectors;
 
 /**
  * Created by Auger on 29/04/2017.
@@ -67,8 +65,5 @@ public class Game {
         this.creationDate = creationDate;
     }
 
-//    public Set<Player> getPlayers() {
-//        return participations.stream().map(participation -> participation.getPlayer()).collect(Collectors.toSet());
-//    }
 
 }
