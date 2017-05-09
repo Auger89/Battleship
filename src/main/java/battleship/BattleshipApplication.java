@@ -48,7 +48,7 @@ public class BattleshipApplication {
 			Participation part3 = new Participation(p3, g2);
 			Participation part4 = new Participation(p4, g3);
 			// Creating new ships
-			Ship patrolBoat = new Ship("patrolBoat", Arrays.asList("H3", "H4"));
+			Ship patrolBoat = new Ship("patrol boat", Arrays.asList("H3", "H4"));
 			Ship submarine = new Ship("submarine", Arrays.asList("A9", "B9", "C9"));
 			Ship destroyer = new Ship("destroyer", Arrays.asList("J7", "J8", "J9"));
 			Ship battleShip = new Ship("battleShip", Arrays.asList("C2", "D2", "E2", "F2"));

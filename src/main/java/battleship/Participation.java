@@ -14,7 +14,7 @@ public class Participation {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private long Id;
+    private long id;
 
     private String joinDate;
 
@@ -47,7 +47,7 @@ public class Participation {
         sb.append("Player{");
         sb.append("\n");
         sb.append("id=");
-        sb.append(Id);
+        sb.append(id);
         sb.append("\n");
         sb.append("joinDate=");
         sb.append(joinDate);
@@ -83,12 +83,8 @@ public class Participation {
         this.game = game;
     }
 
-    public void setShips(Set<Ship> ships) {
-        this.ships = ships;
-    }
-
     public long getId() {
-        return Id;
+        return id;
     }
 
     public String getJoinDate() {
