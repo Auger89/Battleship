@@ -26,6 +26,7 @@ public class Participation {
     @JoinColumn(name="game_id")
     private Game game;
 
+    // mappedBy is the field's name that controls the relationship
     @OneToMany(mappedBy="participation", fetch=FetchType.EAGER)
     private Set<Ship> ships = new HashSet<>();
 
@@ -44,20 +45,21 @@ public class Participation {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("Player{");
-        sb.append("\n");
+        sb.append("Participation{");
         sb.append("id=");
         sb.append(id);
-        sb.append("\n");
+        sb.append(", ");
         sb.append("joinDate=");
         sb.append(joinDate);
-        sb.append("\n");
+        sb.append(", ");
         sb.append("player=");
         sb.append(player);
-        sb.append("\n");
+        sb.append(", ");
         sb.append("game=");
         sb.append(game);
-        sb.append("\n");
+        sb.append(", ");
+        sb.append("ships=");
+        sb.append(ships);
         sb.append("}");
 
         return sb.toString();

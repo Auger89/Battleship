@@ -33,27 +33,22 @@ public class BattleshipController {
     @RequestMapping("/game_view/{participationId}")
     public Map<String, Object> getGameView(@PathVariable long participationId) {
         Participation participation = participationRepo.findOne(participationId);
-        return makeGameViewDTO(participation.getGame());
-    }
-
-    private Map<String, Object> makeGameViewDTO(Game game) {
+        Game game = participation.getGame();
         Map<String, Object> dto = new LinkedHashMap<String, Object>();
         dto.put("id", game.getId());
         dto.put("created", game.getCreationDate());
         dto.put("participations", game.getParticipations().stream()
-                .map(participation -> makeParticipationDTO(participation)).collect(Collectors.toList()));
-        dto.put("ships", game.getParticipations().stream()
-                .map(participation -> makeShipDTO(participation)).collect(Collectors.toList()));
+                .map(part -> makeParticipationDTO(part)).collect(Collectors.toList()));
+        dto.put("ships", participation.getShips().stream()
+                .map(ship -> makeShipDTO(ship)).collect(Collectors.toList()));
+
         return dto;
     }
 
-    private Map<String, Object> makeShipDTO(Participation participation) {
+    private Map<String, Object> makeShipDTO(Ship ship) {
         Map<String, Object> dto = new LinkedHashMap<String, Object>();
-        Set<Ship> ships = participation.getShips();
-        for (Ship ship : ships) {
-            dto.put("type", ship.getType());
-            dto.put("location", ship.getLocations());
-        }
+        dto.put("type", ship.getType());
+        dto.put("location", ship.getLocations());
         return dto;
     }
 

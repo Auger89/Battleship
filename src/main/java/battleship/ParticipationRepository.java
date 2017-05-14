@@ -8,4 +8,5 @@ import java.util.List;
  * Repository for Participation
  */
 public interface ParticipationRepository extends JpaRepository<Participation, Long> {
+    Participation findById(long id);
 }
