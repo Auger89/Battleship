@@ -18,7 +18,8 @@ public class BattleshipApplication {
 	public CommandLineRunner initData(PlayerRepository playerRepository,
 									  GameRepository gameRepository,
 									  ParticipationRepository participationRepository,
-									  ShipRepository shipRepository) {
+									  ShipRepository shipRepository,
+									  SalvoRepository salvoRepository) {
 		return (args) -> {
 			// Create and Save some players
 			Player p1 = new Player("j.bauer@ctu.gov");
@@ -69,6 +70,16 @@ public class BattleshipApplication {
 			part3.addShip(d2);
 			part3.addShip(bs2);
 			part3.addShip(cr2);
+			// Creating salvoes
+			Salvo s1 = new Salvo(1, Arrays.asList("B2", "C3", "E8"));
+			Salvo s2 = new Salvo(2, Arrays.asList("F2", "H4", "A8"));
+			Salvo s3 = new Salvo(1, Arrays.asList("B2", "C3", "E8"));
+			Salvo s4 = new Salvo(2, Arrays.asList("F2", "H4", "A8"));
+			// Adding salvoes
+			part1.addSalvo(s1);
+			part1.addSalvo(s2);
+			part2.addSalvo(s3);
+			part2.addSalvo(s4);
 			// Saving Participations
 			participationRepository.save(part1);
 			participationRepository.save(part2);
@@ -85,6 +96,11 @@ public class BattleshipApplication {
 			shipRepository.save(d2);
 			shipRepository.save(bs2);
 			shipRepository.save(cr2);
+			// Saving salvoes
+			salvoRepository.save(s1);
+			salvoRepository.save(s2);
+			salvoRepository.save(s3);
+			salvoRepository.save(s4);
 
 		};
 	}

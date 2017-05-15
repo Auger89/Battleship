@@ -30,6 +30,9 @@ public class Participation {
     @OneToMany(mappedBy="participation", fetch=FetchType.EAGER)
     private Set<Ship> ships = new HashSet<>();
 
+    @OneToMany(mappedBy="participation", fetch=FetchType.EAGER)
+    private Set<Salvo> salvoes = new HashSet<>();
+
     // Constructors
     public Participation() {}
 
@@ -38,7 +41,6 @@ public class Participation {
         this.game = game;
         this.joinDate = DateUtil.getDateNow();
     }
-
 
     // ToString
     @Override
@@ -60,6 +62,9 @@ public class Participation {
         sb.append(", ");
         sb.append("ships=");
         sb.append(ships);
+        sb.append(", ");
+        sb.append("salvoes=");
+        sb.append(salvoes);
         sb.append("}");
 
         return sb.toString();
@@ -69,6 +74,11 @@ public class Participation {
     public void addShip(Ship ship) {
         this.ships.add(ship);
         ship.setParticipation(this);
+    }
+
+    public void addSalvo(Salvo salvo) {
+        this.salvoes.add(salvo);
+        salvo.setParticipation(this);
     }
 
 
@@ -105,4 +115,7 @@ public class Participation {
         return ships;
     }
 
+    public Set<Salvo> getSalvoes() {
+        return salvoes;
+    }
 }
