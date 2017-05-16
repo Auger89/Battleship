@@ -66,7 +66,7 @@ public class BattleshipController {
         Map<String, Object> dto = new LinkedHashMap<>();
         Participation participation = salvo.getParticipation();
         dto.put("turn", salvo.getTurnNumber());
-        dto.put("player", participation.getPlayer().getId());
+        dto.put("player", participation.getId());
         dto.put("locations", salvo.getLocations());
         return dto;
     }

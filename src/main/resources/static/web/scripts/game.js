@@ -7,17 +7,18 @@ $(document).ready(function() {
         type: 'GET',
         url: '../api/game_view/' + parameter,
         success: function(data) {
-            displayGrid();
-            var shipArray = data.ships;
-            displayAllShips(shipArray);
+            displayGrid('ship');
+            displayGrid('salvo');
             showPlayers(data, parameter);
+            displayAllShips(data);
+            displaySalvoes(data, parameter);
         }
     });
 });
 
 // This function creates the main Grid with divs and fills every cell with an image
-function displayGrid() {
-    grid = $('#grid');
+function displayGrid(type) {
+    grid = $('#' + type + '-grid');
     // Creating all the rows in the grid
     for (var i=-1; i<12; i++) {
         // Getting the letter for the grid
@@ -28,8 +29,13 @@ function displayGrid() {
             tile = $('<div class="tile"></div>');
 
             // Setting id's for each tile
-            var tileId = char + j;
+            if (type == "ship") {
+                var tileId = char + j;
+            } else if (type == "salvo") {
+                var tileId = 's' + char + j;
+            }
             tile.attr("id", tileId);
+
 
             // Appending each tile into the grid
             grid.append(tile);
@@ -38,6 +44,8 @@ function displayGrid() {
             $('.tile').css("box-sizing", "border-box");
             $('.tile').css("width", "32px");
             $('.tile').css("height", "32px");
+            // We need position absolute to position later a <p> element inside the tile, over an image
+            $('.tile').css("position", "relative");
 
             // Setting correct tiles for every cell
             var imagePath = getImagePath(getImageForCoord(i, j));
@@ -128,7 +136,8 @@ function getRandomImg(type) {
 }
 
 // This function adds ship images to every tile according to every ship locations
-function displayAllShips(shipArray) {
+function displayAllShips(data) {
+    var shipArray = data.ships;
 
     for (var i=0; i<shipArray.length; i++) {
         var shipType = shipArray[i].type;
@@ -146,7 +155,6 @@ function displayAllShips(shipArray) {
            // displaying every image
            displayVerticalShip(shipLoc);
         }
-
     }
 
 }
@@ -232,6 +240,76 @@ function showPlayers(data, participationId) {
     var players = player1 + " vs " + player2;
     $('#players').append(players);
 }
+
+function displaySalvoes(data, participationId) {
+    var salvoes = data.salvoes;
+    var explosionImage = '<img class="salvo-img" src="assets/images/salvo1.png">';
+    var PlayerShipsArray = getPlayerShips(data);
+    var PlayerSalvoesArray = [];
+    // Iterating through salvoes array
+    for (var i=0; i<salvoes.length; i++) {
+        var salvoLocations = salvoes[i].locations;
+        var turnNumber = salvoes[i].turn;
+
+        // Detecting the Player viewing the page
+        if (salvoes[i].player == participationId) {
+            // Iterating through locations array
+            for (var j=0; j<salvoLocations.length; j++) {
+                var coord = salvoLocations[j].toLowerCase();
+                // Showing salvo (explosion image) in the right tile if there's no salvo already
+                // children() function returns an array of elements inside the element which function is called
+                if ( PlayerSalvoesArray.indexOf(coord) == -1 ) {
+                    $('#s' + coord).append(explosionImage);
+                    $('#s' + coord).append('<p class="salvo-turn">' + turnNumber + '</p>');
+                    PlayerSalvoesArray.push(coord);
+                }
+            }
+        }
+        // Detecting the Opponent
+        else {
+            // Iterating through locations array
+            for (var j=0; j<salvoLocations.length; j++) {
+                var coord = salvoLocations[j].toLowerCase();
+                // If there is not any ship in the location
+                if (PlayerShipsArray.indexOf(coord) == -1) {
+                    $('#' + coord).append(explosionImage);
+                }
+                // If there is a ship in the location
+                else if (PlayerShipsArray.indexOf(coord) != -1) {
+//                    $('#' + coord).empty();
+                    $('#' + coord).append(explosionImage);
+                    $('#' + coord).append('<p class="salvo-turn">' + turnNumber + '</p>');
+                }
+            }
+        }
+    }
+}
+
+function getPlayerShips(data) {
+    var playerShips = [];
+    var ships = data.ships;
+    for (var i=0; i<ships.length; i++) {
+        var locationsArray = ships[i].location;
+        for (var j=0; j<locationsArray.length; j++) {
+            playerShips.push(locationsArray[j].toLowerCase());
+        }
+    }
+    return playerShips;
+}
+
+//function getPlayerSalvoes(data, playerId) {
+//    var playerSalvoes = [];
+//    var salvoes = data.salvoes;
+//    for (var i=0; i<salvoes.length; i++) {
+//        if (salvoes[i].player == playerId) {
+//            var locationsArray = salvoes[i].locations;
+//            for (var j=0; j<locationsArray.length; j++) {
+//                playerSalvoes.push(locationsArray[j].toLowerCase());
+//            }
+//        }
+//    }
+//    return playerSalvoes;
+//}
 
 // This function retrieves query string values from the current URL
 function getParameterByName(name, url) {
