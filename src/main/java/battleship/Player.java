@@ -3,15 +3,14 @@ package battleship;
 
 import javax.persistence.*;
 import javax.persistence.Id;
-import java.util.Set;
-import java.util.List;
+import java.util.*;
 import java.lang.String;
 import java.lang.StringBuilder;
 import static java.util.stream.Collectors.toList;
 
 /**
  * Created by Auger on 27/04/2017.
- * Class Player
+ * One-to-Many relation with Participation and Score
  */
 @Entity
 public class Player {
@@ -22,13 +21,19 @@ public class Player {
     private String userName;
 
     @OneToMany(mappedBy="player", fetch=FetchType.EAGER)
-    Set<Participation> participations;
+    private Set<Participation> participations;
+
+    @OneToMany(mappedBy="player", fetch=FetchType.EAGER)
+    private Set<Score> scores;
+
+    private double totalScore;
 
     // Constructors
     public Player() {}
 
     public Player(String userName) {
         this.userName = userName;
+
     }
 
     // ToString
@@ -47,6 +52,36 @@ public class Player {
         sb.append("}");
 
         return sb.toString();
+    }
+
+    // Functions
+    public Score getScore(Game game) {
+        Optional<Score> scoreOptional = scores.stream().filter(score -> score.getGame().equals(game)).findFirst();
+        if (scoreOptional.isPresent()) {
+            return scoreOptional.get();
+        } else {
+            return null;
+        }
+    }
+
+    public double getTotalScore() {
+        if (scores == null) {
+            return 0;
+        } else {
+            return scores.stream().map(score -> score.getScore()).mapToDouble(d -> d.doubleValue()).sum();
+        }
+    }
+
+    public long getNumberOfWins() {
+        return scores.stream().map(score -> score.getScore()).filter(s -> s == 1).count();
+    }
+
+    public long getNumberOfLosses() {
+        return scores.stream().map(score -> score.getScore()).filter(s -> s == 0).count();
+    }
+
+    public long getNumberOfTies() {
+        return scores.stream().map(score -> score.getScore()).filter(s -> s == 0.5).count();
     }
 
     // Getters and Setters
@@ -68,6 +103,10 @@ public class Player {
 
     public List<Game> getGames() {
         return participations.stream().map(sub -> sub.getGame()).collect(toList());
+    }
+
+    public Set<Score> getScores() {
+        return scores;
     }
 
 }

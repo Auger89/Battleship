@@ -1,58 +1,54 @@
 $(document).ready(function() {
-    var gameList = $('#game-list');
 
     $.ajax({
-        // We don't need to specify type:'GET' because is the default value
         type: 'GET',
-        url: '/api/games',
+        url: '../api/scores',
         success: function(data) {
-            $.each(data, function(i, obj) {
-                // Creating Game
-                var listOfGames = $('<li>Game ' + (i+1) + ': </li>');
-                var gameAttributes = $('<ul></ul>');
+            var players = data.players;
+            players.sort(sortByTotalScore);
 
-                // Creating list elements inside Game List
-                var gameId = $('<li>Game ID: ' + obj.id + '</li>');
-                var gameCreation = $('<li>Creation Date: ' + obj.created + '</li>');
-                var gameParticipations = $('<li>Participations: </li>');
-
-                $.each(obj.participations, function(i, obj) {
-                    // Creating list containing our participations
-                    var participationAttributes = $('<ul></ul>');
-
-                    // Creating list elements inside Participations
-                    var participationId = $('<li>Participation ID: ' + obj.id + '</li>');
-                    var participationPlayer = $('<li>Player: </li>');
-
-                    // Creating list containing our Player attributes
-                    var playerAttributes = $('<ul></ul>');
-                    var playerId = $('<li>Player ID: ' + obj.player.id + '</li>');
-                    var playerEmail = $('<li>Player Email: ' + obj.player.email + '</li>');
-
-                    // Appending player attributes to Player List
-                    playerAttributes.append(playerId);
-                    playerAttributes.append(playerEmail);
-
-                    // Appending Player List to Player Value inside Participation
-                    participationPlayer.append(playerAttributes);
-
-                    // Appending Participation attributes to Participation List
-                    participationAttributes.append(participationId);
-                    participationAttributes.append(participationPlayer);
-
-                    //Appending Participation Lists to Participations Value
-                    gameParticipations.append(participationAttributes);
-                });
-
-                // Appending game attributes inside our Game List
-                gameAttributes.append(gameId);
-                gameAttributes.append(gameCreation);
-                gameAttributes.append(gameParticipations);
-
-                // Appending
-                listOfGames.append(gameAttributes);
-                gameList.append(listOfGames);
-            });
+            displayLeaderBoard(players);
         }
     });
+
 });
+
+// This function creates a table using an array of players
+function displayLeaderBoard(players) {
+    var lBoard = $('#leaderBoard');
+
+    // Creating the table header
+    var table = $('<table></table>');
+    var thead = $('<thead></thead>');
+    var headRow = $('<tr></tr>');
+    headRow.append('<td>User Name</td>');
+    headRow.append('<td>Total Score</td>');
+    headRow.append('<td>Wins</td>');
+    headRow.append('<td>Losses</td>');
+    headRow.append('<td>Ties</td>');
+    thead.append(headRow);
+
+    // Creating the table body
+    var tbody = $('<tbody></tbody>');
+    for (var i=0; i<players.length; i++) {
+        var row = $('<tr/>');
+        row.append('<td>' + players[i].userName + '</td>');
+        row.append('<td>' + players[i].totalScore + '</td>');
+        row.append('<td>' + players[i].wins + '</td>');
+        row.append('<td>' + players[i].losses + '</td>');
+        row.append('<td>' + players[i].ties + '</td>');
+        tbody.append(row);
+    }
+
+    // Appending
+    table.append(thead);
+    table.append(tbody);
+    lBoard.append(table);
+}
+
+// This function is used to sort our array of players by their total score.
+function sortByTotalScore(a, b) {
+    if (a.totalScore < b.totalScore) return 1;
+    if (a.totalScore > b.totalScore) return -1;
+    return 0;
+}

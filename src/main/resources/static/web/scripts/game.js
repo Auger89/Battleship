@@ -228,6 +228,11 @@ function displayVerticalShip(locations) {
 
 // This function shows the two Players in the game, specifying which one is viewing the page.
 function showPlayers(data, participationId) {
+    // Considering the case of just one player in a game
+    if (data.participations[1] == null) {
+        $('#players').append(data.participations[0].player.email);
+        return;
+    }
     // Accessing data
     var participation1 = data.participations[0];
     var participation2 = data.participations[1];

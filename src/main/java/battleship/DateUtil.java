@@ -25,4 +25,11 @@ public class DateUtil {
         return date;
     }
 
+    public static String getDateNowPlusMins(int m) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime date2 = now.plusMinutes(m);
+        date = dtf.format(date2);
+        return date;
+    }
+
 }

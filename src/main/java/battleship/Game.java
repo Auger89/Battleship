@@ -6,7 +6,7 @@ import java.util.Set;
 
 /**
  * Created by Auger on 29/04/2017.
- * many-to-many relation
+ * One-to-many relation with Participation and Score
  */
 @Entity
 public class Game {
@@ -17,7 +17,10 @@ public class Game {
     private String creationDate = DateUtil.getDateNow();
 
     @OneToMany(mappedBy="game", fetch=FetchType.EAGER)
-    Set<Participation> participations;
+    private Set<Participation> participations;
+
+    @OneToMany(mappedBy="game", fetch=FetchType.EAGER)
+    private Set<Score> scores;
 
     // Constructors
     public Game() {}

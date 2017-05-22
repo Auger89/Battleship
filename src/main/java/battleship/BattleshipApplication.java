@@ -19,7 +19,8 @@ public class BattleshipApplication {
 									  GameRepository gameRepository,
 									  ParticipationRepository participationRepository,
 									  ShipRepository shipRepository,
-									  SalvoRepository salvoRepository) {
+									  SalvoRepository salvoRepository,
+									  ScoreRepository scoreRepository) {
 		return (args) -> {
 			// Create and Save some players
 			Player p1 = new Player("j.bauer@ctu.gov");
@@ -46,19 +47,29 @@ public class BattleshipApplication {
 			// Creating participations
 			Participation part1 = new Participation(p1, g1);
 			Participation part2 = new Participation(p2, g1);
-			Participation part3 = new Participation(p3, g2);
-			Participation part4 = new Participation(p4, g2);
+			Participation part3 = new Participation(p1, g2);
+			Participation part4 = new Participation(p2, g2);
+			Participation part5 = new Participation(p3, g3);
+			Participation part6 = new Participation(p4, g3);
+			Participation part7 = new Participation(p4, g4);
 			// Creating new ships
 			Ship patrolBoat = new Ship("patrol boat", Arrays.asList("H3", "H4"));
 			Ship submarine = new Ship("submarine", Arrays.asList("A9", "B9", "C9"));
 			Ship destroyer = new Ship("destroyer", Arrays.asList("J7", "J8", "J9"));
 			Ship battleShip = new Ship("battleShip", Arrays.asList("C2", "D2", "E2", "F2"));
 			Ship carrier = new Ship("carrier", Arrays.asList("B2", "B3", "B4", "B5", "B6"));
+
 			Ship pb2 = new Ship("patrol boat", Arrays.asList("A2", "A3"));
 			Ship sub2 = new Ship("submarine", Arrays.asList("C5", "C6", "C7"));
 			Ship d2 = new Ship("destroyer", Arrays.asList("A8", "B8", "C8"));
 			Ship bs2 = new Ship("battleShip", Arrays.asList("J7", "J8", "J9", "J10"));
 			Ship cr2 = new Ship("carrier", Arrays.asList("D2", "E2", "F2", "G2", "H2"));
+
+			Ship d3 = new Ship("destroyer", Arrays.asList("B5", "C5", "D5"));
+			Ship pb3 = new Ship("patrol boat", Arrays.asList("C6", "C7"));
+			Ship sub3 = new Ship("submarine", Arrays.asList("A2", "A3", "A4"));
+			Ship bs3 = new Ship("battleship", Arrays.asList("F2", "G2", "H2", "I2"));
+			Ship cr3 = new Ship("carrier", Arrays.asList("H4", "H5", "H6", "H7", "H8"));
 			// Adding ships to participations
 			part1.addShip(patrolBoat);
 			part1.addShip(submarine);
@@ -70,6 +81,11 @@ public class BattleshipApplication {
 			part3.addShip(d2);
 			part3.addShip(bs2);
 			part3.addShip(cr2);
+			part5.addShip(d3);
+			part5.addShip(pb3);
+			part5.addShip(sub3);
+			part5.addShip(bs3);
+			part5.addShip(cr3);
 			// Creating salvoes
 			Salvo s1 = new Salvo(1, Arrays.asList("B2", "C3", "E8"));
 			Salvo s2 = new Salvo(2, Arrays.asList("F2", "H4", "A8"));
@@ -80,11 +96,21 @@ public class BattleshipApplication {
 			part1.addSalvo(s2);
 			part2.addSalvo(s3);
 			part2.addSalvo(s4);
+			// Adding Scores
+			String date1 = DateUtil.getDateNowPlusMins(5);
+			String date2 = DateUtil.getDateNowPlusMins(10);
+			Score score1 = new Score(1, date1, part1);
+			Score score2 = new Score(0, date1, part2);
+			Score score3 = new Score(0.5, date2, part3);
+			Score score4 = new Score(0.5, date2, part4);
 			// Saving Participations
 			participationRepository.save(part1);
 			participationRepository.save(part2);
 			participationRepository.save(part3);
 			participationRepository.save(part4);
+			participationRepository.save(part5);
+			participationRepository.save(part6);
+			participationRepository.save(part7);
 			// Saving ships
 			shipRepository.save(patrolBoat);
 			shipRepository.save(submarine);
@@ -96,11 +122,21 @@ public class BattleshipApplication {
 			shipRepository.save(d2);
 			shipRepository.save(bs2);
 			shipRepository.save(cr2);
+			shipRepository.save(d3);
+			shipRepository.save(pb3);
+			shipRepository.save(sub3);
+			shipRepository.save(bs3);
+			shipRepository.save(cr3);
 			// Saving salvoes
 			salvoRepository.save(s1);
 			salvoRepository.save(s2);
 			salvoRepository.save(s3);
 			salvoRepository.save(s4);
+			// Saving Scores
+			scoreRepository.save(score1);
+			scoreRepository.save(score2);
+			scoreRepository.save(score3);
+			scoreRepository.save(score4);
 
 		};
 	}

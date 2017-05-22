@@ -22,6 +22,10 @@ public class BattleshipController {
     @Autowired
     private ParticipationRepository participationRepo;
 
+    @Autowired
+    private PlayerRepository playerRepo;
+
+    // Put scores inside player -> score
     @RequestMapping("/games")
     public List<Object> getAllGames() {
         return gameRepo.findAll().stream().map(game -> makeGameDTO(game)).collect(Collectors.toList());
@@ -32,14 +36,13 @@ public class BattleshipController {
         Participation participation = participationRepo.findOne(participationId);
         Game game = participation.getGame();
         Set<Salvo> allSalvoes = new HashSet<>();
-        Set<Participation> participations = game.getParticipations();
-        for (Participation part : participations) {
-            Set<Salvo> salvoes = part.getSalvoes();
-            for (Salvo salvo : salvoes) {
+
+        for (Participation part : game.getParticipations()) {
+            for (Salvo salvo : part.getSalvoes()) {
                 allSalvoes.add(salvo);
             }
         }
-        Map<String, Object> dto = new LinkedHashMap<String, Object>();
+        Map<String, Object> dto = new LinkedHashMap<>();
         dto.put("id", game.getId());
         dto.put("created", game.getCreationDate());
         dto.put("participations", game.getParticipations().stream()
@@ -51,6 +54,28 @@ public class BattleshipController {
 //        dto.put("salvoes2", game.getParticipations().stream()
 //                .map(part -> makeSalvoesByPlayerDTO(part)).collect(Collectors.toList()));
 //        dto.put("salvoes3", makeSalvoesDTO(game));
+        return dto;
+    }
+
+    // The main difference between HashMap and LinkedHashMap is:
+    // LinkedHashMap will iterate in the order in which the entries were inserted to the Map,
+    // HashMap has no guarantees about the iteration order.
+    @RequestMapping("/scores")
+    public Map<String, Object> getPlayersScores() {
+        List<Player> players = playerRepo.findAll();
+        Map<String, Object> dto = new LinkedHashMap<>();
+        dto.put("players", players.stream().map(player -> makePlayerScoreDTO(player)).collect(Collectors.toList()));
+        return dto;
+    }
+
+    private Map<String, Object> makePlayerScoreDTO(Player player) {
+        Map<String, Object> dto = new LinkedHashMap<>();
+        dto.put("id", player.getId());
+        dto.put("userName", player.getUserName());
+        dto.put("totalScore", player.getTotalScore());
+        dto.put("wins", player.getNumberOfWins());
+        dto.put("losses", player.getNumberOfLosses());
+        dto.put("ties", player.getNumberOfTies());
         return dto;
     }
 
@@ -99,7 +124,7 @@ public class BattleshipController {
     }
 
     private Map<String, Object> makeGameDTO(Game game) {
-        Map<String, Object> dto = new LinkedHashMap<String, Object>();
+        Map<String, Object> dto = new LinkedHashMap<>();
         dto.put("id", game.getId());
         dto.put("created", game.getCreationDate());
         dto.put("participations", game.getParticipations().stream()
@@ -108,16 +133,33 @@ public class BattleshipController {
     }
 
     private Map<String, Object> makeParticipationDTO(Participation participation) {
-        Map<String, Object> dto = new LinkedHashMap<String, Object>();
+        Map<String, Object> dto = new LinkedHashMap<>();
         dto.put("id", participation.getId());
-        dto.put("player", makePlayerDTO(participation.getPlayer()));
+        dto.put("player", makePlayerDTO(participation.getPlayer(), participation.getGame()));
         return dto;
     }
 
-    private Map<String, Object> makePlayerDTO(Player player) {
-        Map<String, Object> dto = new LinkedHashMap<String, Object>();
+    private Map<String, Object> makePlayerDTO(Player player, Game game) {
+        Map<String, Object> dto = new LinkedHashMap<>();
         dto.put("id", player.getId());
         dto.put("email", player.getUserName());
+        Object score;
+
+        score = getScore(player, game);
+        dto.put("score", score);
+
         return dto;
     }
+
+    private Double getScore(Player player, Game game) {
+
+        Score score = player.getScore(game);
+        if (score == null) {
+            return null;
+        } else {
+            return score.getScore();
+        }
+
+    }
+
 }

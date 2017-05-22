@@ -1,14 +1,12 @@
 package battleship;
 
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 /**
- * Created by Auger on 28/04/2017.
- * Repository for Player
+ * Created by Auger on 17/05/2017.
+ * Repository for Score
  */
 @RepositoryRestResource
-public interface PlayerRepository extends JpaRepository<Player, Long> {
-    Player findById(long id);
+public interface ScoreRepository extends JpaRepository<Score, Long>{
 }

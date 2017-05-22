@@ -7,7 +7,7 @@ import java.util.Set;
 /**
  * Created by Auger on 01/05/2017.
  * Class Participation defines which players are playing which games.
- * Many-to-many relationship with Game and Player.
+ * One-to-many relationship with Game and Player.
  */
 @Entity
 public class Participation {
@@ -32,6 +32,10 @@ public class Participation {
 
     @OneToMany(mappedBy="participation", fetch=FetchType.EAGER)
     private Set<Salvo> salvoes = new HashSet<>();
+
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(name="score_id")
+    private Score score;
 
     // Constructors
     public Participation() {}
@@ -81,7 +85,6 @@ public class Participation {
         salvo.setParticipation(this);
     }
 
-
     // Getters and Setters
     public void setJoinDate(String joinDate) {
         this.joinDate = joinDate;
@@ -93,6 +96,18 @@ public class Participation {
 
     public void setGame(Game game) {
         this.game = game;
+    }
+
+    public void setShips(Set<Ship> ships) {
+        this.ships = ships;
+    }
+
+    public void setSalvoes(Set<Salvo> salvoes) {
+        this.salvoes = salvoes;
+    }
+
+    public void setScore(Score score) {
+        this.score = score;
     }
 
     public long getId() {
@@ -117,5 +132,9 @@ public class Participation {
 
     public Set<Salvo> getSalvoes() {
         return salvoes;
+    }
+
+    public Score getScore() {
+        return score;
     }
 }
