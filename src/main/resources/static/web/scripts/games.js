@@ -1,14 +1,23 @@
 $(document).ready(function() {
 
+    showUser();
+
     $.ajax({
         type: 'GET',
         url: '../api/scores',
         success: function(data) {
             var players = data.players;
             players.sort(sortByTotalScore);
-
             displayLeaderBoard(players);
         }
+    });
+
+    // Listeners to login/logout buttons
+    $('#login-button').click(function(event) {
+        login(event, 'login');
+    });
+    $('#logout-button').click(function(event) {
+        logout(event);
     });
 
 });

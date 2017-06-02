@@ -26,8 +26,8 @@ public class Score {
     @JoinColumn(name="game_id")
     private Game game;
 
-    @OneToMany(mappedBy="score", fetch=FetchType.EAGER)
-    private Set<Participation> participations;
+//    @OneToMany(mappedBy="score", fetch=FetchType.EAGER)
+//    private Set<Participation> participations;
 
     // Constructors
     public Score() {}

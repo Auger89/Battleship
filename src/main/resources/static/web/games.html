@@ -7,11 +7,46 @@
     <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
+    <nav>
+        <div id="main-logo">
+            <a href="games.html">
+                <img id="logo" src="assets/images/main-logo.png" alt="logo">
+            </a>
+        </div>
+
+        <div id="authentication-section">
+            <form id="login-form" onsubmit="return false">
+                <label>Email: <input type="email" name="email"></label>
+                <label>Password: <input type="text" name="password"></label>
+                <!--<label><input id="loginbutton" type="submit" value="LOG IN"></label>-->
+                <button id="login-button">LOG IN</button>
+            </form>
+
+            <div id="user">
+            </div>
+
+            <form id="logout-form" onsubmit="return false">
+                <button id="logout-button">LOG OUT</button>
+            </form>
+
+            <a href="sign-up.html">
+                <btn class="sign-btn">
+                    <img src="assets/images/login-btn.png" alt="signup button">
+                    <p class="nav-font">SIGN UP</p>
+                </btn>
+            </a>
+        </div>
+
+    </nav>
+
+    <a href="game.html?gp=1"><button style="width:70px; background-color:red; font-size: 18px">TEST</button></a>
+
     <h1>LEADERBOARD</h1>
     <div id="leaderBoard"></div>
 
     <!--jQuery-->
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="scripts/security.js"></script>
     <script src="scripts/games.js"></script>
 </body>
 </html>

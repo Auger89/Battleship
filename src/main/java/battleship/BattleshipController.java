@@ -1,9 +1,10 @@
 package battleship;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,8 +28,13 @@ public class BattleshipController {
 
     // Put scores inside player -> score
     @RequestMapping("/games")
-    public List<Object> getAllGames() {
-        return gameRepo.findAll().stream().map(game -> makeGameDTO(game)).collect(Collectors.toList());
+    public Map<String, Object> getPlayerGames(Authentication authentication) {
+        Player player = playerRepo.findByUserName(authentication.getName());
+
+        Map<String, Object> dto = new LinkedHashMap<>();
+        dto.put("player", makePlayerDTO(player));
+        dto.put("games", player.getGames().stream().map(game -> makeGameDTO(game)).collect(Collectors.toList()));
+        return dto;
     }
 
     @RequestMapping("/game_view/{participationId}")
@@ -50,10 +56,10 @@ public class BattleshipController {
         dto.put("ships", participation.getShips().stream()
                 .map(ship -> makeShipDTO(ship)).collect(Collectors.toList()));
         dto.put("salvoes", allSalvoes.stream()
-                .map(salvo -> makeSalvo2DTO(salvo)).collect(Collectors.toList()));
+                .map(salvo -> makeSalvoDTO(salvo)).collect(Collectors.toList()));
 //        dto.put("salvoes2", game.getParticipations().stream()
 //                .map(part -> makeSalvoesByPlayerDTO(part)).collect(Collectors.toList()));
-//        dto.put("salvoes3", makeSalvoesDTO(game));
+//        dto.put("salvoes3", makeSalvoes3DTO(game));
         return dto;
     }
 
@@ -66,6 +72,43 @@ public class BattleshipController {
         Map<String, Object> dto = new LinkedHashMap<>();
         dto.put("players", players.stream().map(player -> makePlayerScoreDTO(player)).collect(Collectors.toList()));
         return dto;
+    }
+
+    /**
+     * This method responds to a request to create a new Player
+     * @param username
+     * @param password
+     * @return ResponseEntity and a JSON
+     */
+    @RequestMapping(path = "/players", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> createPlayer(@RequestParam("username") String username,
+                                                            @RequestParam("password") String password) {
+        // Case username field (email) is empty
+        EmailValidator emailvalidator = new EmailValidator();
+        if (!emailvalidator.validate(username)) {
+            return new ResponseEntity<>(makeResponse("error", "invalid email"), HttpStatus.BAD_REQUEST);
+        }
+
+        // Case password field is empty
+        if (password.length() < 2) {
+            return new ResponseEntity<>(makeResponse("error", "invalid password"), HttpStatus.BAD_REQUEST);
+        }
+
+        // Case username already exists
+        Player user = playerRepo.findByUserName(username);
+        if (user != null) {
+            return new ResponseEntity<>(makeResponse("error", "name in use"), HttpStatus.FORBIDDEN);
+        }
+
+        // Case OK
+        playerRepo.save(new Player(username, password));
+        return new ResponseEntity<>(makeResponse("username", username), HttpStatus.CREATED);
+    }
+
+    private Map<String, Object> makeResponse(String key, Object value) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(key, value);
+        return map;
     }
 
     private Map<String, Object> makePlayerScoreDTO(Player player) {
@@ -87,7 +130,7 @@ public class BattleshipController {
     }
 
     // First Option for salvoes api
-    private Map<String, Object> makeSalvo2DTO(Salvo salvo) {
+    private Map<String, Object> makeSalvoDTO(Salvo salvo) {
         Map<String, Object> dto = new LinkedHashMap<>();
         Participation participation = salvo.getParticipation();
         dto.put("turn", salvo.getTurnNumber());
@@ -101,21 +144,21 @@ public class BattleshipController {
         Map<String, Object> dto = new LinkedHashMap<>();
         Player player = participation.getPlayer();
         Set<Salvo> salvoes = participation.getSalvoes();
-        dto.put(Objects.toString(player.getId()), makeSalvoDTO(salvoes));
+        dto.put(Objects.toString(player.getId()), makeSalvo2DTO(salvoes));
         return dto;
     }
 
     // Option 3 for salvoes api
-    private Map<String, Object> makeSalvoesDTO(Game game) {
+    private Map<String, Object> makeSalvoes3DTO(Game game) {
         Map<String, Object> dto = new LinkedHashMap<>();
         Set<Participation> participations = game.getParticipations();
         for (Participation participation : participations) {
-            dto.put(Objects.toString(participation.getId()), makeSalvoDTO(participation.getSalvoes()));
+            dto.put(Objects.toString(participation.getId()), makeSalvo2DTO(participation.getSalvoes()));
         }
         return dto;
     }
 
-    private Map<String, Object> makeSalvoDTO(Set<Salvo> salvoes) {
+    private Map<String, Object> makeSalvo2DTO(Set<Salvo> salvoes) {
         Map<String, Object> dto = new LinkedHashMap<>();
         for (Salvo salvo : salvoes) {
             dto.put(Objects.toString(salvo.getTurnNumber()), salvo.getLocations());
@@ -135,11 +178,11 @@ public class BattleshipController {
     private Map<String, Object> makeParticipationDTO(Participation participation) {
         Map<String, Object> dto = new LinkedHashMap<>();
         dto.put("id", participation.getId());
-        dto.put("player", makePlayerDTO(participation.getPlayer(), participation.getGame()));
+        dto.put("player", makePlayerWithScoreDTO(participation.getPlayer(), participation.getGame()));
         return dto;
     }
 
-    private Map<String, Object> makePlayerDTO(Player player, Game game) {
+    private Map<String, Object> makePlayerWithScoreDTO(Player player, Game game) {
         Map<String, Object> dto = new LinkedHashMap<>();
         dto.put("id", player.getId());
         dto.put("email", player.getUserName());
@@ -151,15 +194,26 @@ public class BattleshipController {
         return dto;
     }
 
-    private Double getScore(Player player, Game game) {
+    private Map<String, Object> makePlayerDTO(Player player) {
+        Map<String, Object> dto = new LinkedHashMap<>();
+        dto.put("id", player.getId());
+        dto.put("email", player.getUserName());
+        return dto;
+    }
 
+    /**
+     * This method handles the chance of not getting a Score because a Player hasn't finished a game
+     * @param player Player
+     * @param game Game
+     * @return Score or null
+     */
+    private Double getScore(Player player, Game game) {
         Score score = player.getScore(game);
         if (score == null) {
             return null;
         } else {
             return score.getScore();
         }
-
     }
 
 }

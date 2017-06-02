@@ -1,6 +1,10 @@
 // http://localhost:8080/web/game.html?gp=1
 
 $(document).ready(function() {
+
+    // Showing logged user
+    showUser();
+
     var parameter = getParameterByName("gp");
     $.ajax({
         // We don't need to specify type:'GET' because it is the default value
@@ -14,6 +18,11 @@ $(document).ready(function() {
             displaySalvoes(data, parameter);
         }
     });
+
+    // Listening to Logout button
+    $('#logout-button').click(function(event) {
+            logout(event);
+        });
 });
 
 // This function creates the main Grid with divs and fills every cell with an image
@@ -36,36 +45,30 @@ function displayGrid(type) {
             }
             tile.attr("id", tileId);
 
-
             // Appending each tile into the grid
             grid.append(tile);
-
-            // styling the tiles
-            $('.tile').css("box-sizing", "border-box");
-            $('.tile').css("width", "32px");
-            $('.tile').css("height", "32px");
-            // We need position absolute to position later a <p> element inside the tile, over an image
-            $('.tile').css("position", "relative");
 
             // Setting correct tiles for every cell
             var imagePath = getImagePath(getImageForCoord(i, j));
             $('#' + tileId).css("background-image", "url(" + imagePath + ")");
 
-            // Writing coordenates
+            // Displaying grid coordenates (1..10) and (A..J)
             if (i == -1 && j > 0 && j < 11) {
                 // Writing numbers
-                $('#' + tileId).css("line-height", "32px");
-                $('#' + tileId).css("vertical-align", "middle");
-                $('#' + tileId).append($('<h3>' + j + '</h3>'))
+                displayGridCoords(tileId, j);
             } else if (j == -1 && i > 0 && i < 11) {
                 // Writing letters
-                $('#' + tileId).css("line-height", "32px");
-                $('#' + tileId).css("vertical-align", "middle");
-                $('#' + tileId).append($('<h3>' + char + '</h3>'))
+                displayGridCoords(tileId, char);
             }
         }
 
     }
+}
+
+function displayGridCoords(id, alphanumeric) {
+    $('#' + id).css("line-height", "32px");
+    $('#' + id).css("vertical-align", "middle");
+    $('#' + id).append($('<h3>' + alphanumeric + '</h3>'));
 }
 
 function getLetterFromIndex(index) {
@@ -301,20 +304,6 @@ function getPlayerShips(data) {
     }
     return playerShips;
 }
-
-//function getPlayerSalvoes(data, playerId) {
-//    var playerSalvoes = [];
-//    var salvoes = data.salvoes;
-//    for (var i=0; i<salvoes.length; i++) {
-//        if (salvoes[i].player == playerId) {
-//            var locationsArray = salvoes[i].locations;
-//            for (var j=0; j<locationsArray.length; j++) {
-//                playerSalvoes.push(locationsArray[j].toLowerCase());
-//            }
-//        }
-//    }
-//    return playerSalvoes;
-//}
 
 // This function retrieves query string values from the current URL
 function getParameterByName(name, url) {

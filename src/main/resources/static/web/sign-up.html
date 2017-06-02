@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Ship Locations!</title>
+    <title>LOG IN</title>
     <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
     <link rel="stylesheet" href="styles/style.css">
 </head>
@@ -13,28 +13,23 @@
                 <img id="logo" src="assets/images/main-logo.png" alt="logo">
             </a>
         </div>
-
-        <div id="authentication-section">
-            <div id="user">
-            </div>
-            <form id="logout-form" onsubmit="return false">
-                <button id="logout-button">LOG OUT</button>
-            </form>
-        </div>
-
     </nav>
 
-    <h1>BATTLESHIP!</h1>
-    <h2 id="players"></h2>
+    <h1>CREATE YOUR ACCOUNT</h1>
 
-    <div class="flex-row">
-        <div id="ship-grid"></div>
-        <div id="salvo-grid"></div>
+    <div id="container-form">
+        <form id="sign-form" onsubmit="return false">
+            <label>Email: <input type="text" name="email"></label>
+            <label>Password: <input type="text" name="password"></label>
+            <!--<label><input id="loginbutton" type="submit" value="LOG IN"></label>-->
+            <button id="sign-button">SIGN UP</button>
+        </form>
     </div>
+
 
     <!--jQuery-->
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="scripts/security.js"></script>
-    <script src="scripts/game.js"></script>
+    <script src="scripts/sign-up.js"></script>
 </body>
 </html>

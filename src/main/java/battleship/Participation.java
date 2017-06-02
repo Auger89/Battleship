@@ -33,9 +33,6 @@ public class Participation {
     @OneToMany(mappedBy="participation", fetch=FetchType.EAGER)
     private Set<Salvo> salvoes = new HashSet<>();
 
-    @ManyToOne(fetch=FetchType.EAGER)
-    @JoinColumn(name="score_id")
-    private Score score;
 
     // Constructors
     public Participation() {}
@@ -45,6 +42,7 @@ public class Participation {
         this.game = game;
         this.joinDate = DateUtil.getDateNow();
     }
+
 
     // ToString
     @Override
@@ -74,6 +72,7 @@ public class Participation {
         return sb.toString();
     }
 
+
     // Functions
     public void addShip(Ship ship) {
         this.ships.add(ship);
@@ -84,6 +83,11 @@ public class Participation {
         this.salvoes.add(salvo);
         salvo.setParticipation(this);
     }
+
+    public Score getScore() {
+        return this.player.getScore(this.game);
+    }
+
 
     // Getters and Setters
     public void setJoinDate(String joinDate) {
@@ -104,10 +108,6 @@ public class Participation {
 
     public void setSalvoes(Set<Salvo> salvoes) {
         this.salvoes = salvoes;
-    }
-
-    public void setScore(Score score) {
-        this.score = score;
     }
 
     public long getId() {
@@ -132,9 +132,5 @@ public class Participation {
 
     public Set<Salvo> getSalvoes() {
         return salvoes;
-    }
-
-    public Score getScore() {
-        return score;
     }
 }

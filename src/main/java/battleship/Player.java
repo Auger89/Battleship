@@ -18,7 +18,9 @@ public class Player {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private long id;
+
     private String userName;
+    private String password;
 
     @OneToMany(mappedBy="player", fetch=FetchType.EAGER)
     private Set<Participation> participations;
@@ -26,15 +28,15 @@ public class Player {
     @OneToMany(mappedBy="player", fetch=FetchType.EAGER)
     private Set<Score> scores;
 
-    private double totalScore;
 
     // Constructors
     public Player() {}
 
-    public Player(String userName) {
+    public Player(String userName, String password) {
         this.userName = userName;
-
+        this.password = password;
     }
+
 
     // ToString
     @Override
@@ -53,6 +55,7 @@ public class Player {
 
         return sb.toString();
     }
+
 
     // Functions
     public Score getScore(Game game) {
@@ -73,16 +76,29 @@ public class Player {
     }
 
     public long getNumberOfWins() {
-        return scores.stream().map(score -> score.getScore()).filter(s -> s == 1).count();
+        if (scores == null) {
+            return 0;
+        } else {
+            return scores.stream().map(score -> score.getScore()).filter(s -> s == 1).count();
+        }
     }
 
     public long getNumberOfLosses() {
-        return scores.stream().map(score -> score.getScore()).filter(s -> s == 0).count();
+        if (scores == null) {
+            return 0;
+        } else {
+            return scores.stream().map(score -> score.getScore()).filter(s -> s == 0).count();
+        }
     }
 
     public long getNumberOfTies() {
-        return scores.stream().map(score -> score.getScore()).filter(s -> s == 0.5).count();
+        if (scores == null) {
+            return 0;
+        } else {
+            return scores.stream().map(score -> score.getScore()).filter(s -> s == 0.5).count();
+        }
     }
+
 
     // Getters and Setters
     public String getUserName() {
@@ -109,4 +125,11 @@ public class Player {
         return scores;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
