@@ -1,21 +1,34 @@
-// http://localhost:8080/web/game.html?gp=1
+// http://localhost:8080/web/game.html?part=1
 
 $(document).ready(function() {
 
     // Showing logged user
-    showUser();
+    $.ajax({
+        type: 'GET',
+        url: '/api/games',
+        success: function(data) {
+            showUser(data);
+        },
+        error: function() {
+            manageLogin(false);
+        }
+    });
 
-    var parameter = getParameterByName("gp");
+    var parameter = getParameterByName("part");
     $.ajax({
         // We don't need to specify type:'GET' because it is the default value
         type: 'GET',
-        url: '../api/game_view/' + parameter,
+        url: '/api/game_view/' + parameter,
         success: function(data) {
             displayGrid('ship');
             displayGrid('salvo');
             showPlayers(data, parameter);
             displayAllShips(data);
             displaySalvoes(data, parameter);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            alert("Error: " + jqXHR.responseJSON.error);
+            location.href = "/web/games.html";
         }
     });
 

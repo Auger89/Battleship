@@ -1,6 +1,17 @@
+
 $(document).ready(function() {
 
-    showUser();
+    $.ajax({
+        type: 'GET',
+        url: '/api/games',
+        success: function(data) {
+            showUser(data);
+            displayGameList(data);
+        },
+        error: function() {
+            manageLogin(false);
+        }
+    });
 
     $.ajax({
         type: 'GET',
@@ -12,15 +23,56 @@ $(document).ready(function() {
         }
     });
 
-    // Listeners to login/logout buttons
+    // Listeners to buttons
     $('#login-button').click(function(event) {
         login(event, 'login');
     });
+
     $('#logout-button').click(function(event) {
         logout(event);
     });
 
+    $('#newgame-button').click(createGame);
+
+    $(document).on('click', '.joingame-button', function(event) {
+        joinGame(event);
+    });
+
 });
+
+// This function creates a new Game by posting to api/game
+function createGame() {
+    var user = $('#user').text();
+
+    $.ajax({
+        type: 'POST',
+        url: '/api/game',
+        data: {
+            username: user
+        },
+        success: function(response) {
+            location.href = "/web/game.html?part=" + response.participationId;
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            alert("Error: " + jqXHR.responseJSON.error);
+        }
+    });
+}
+
+function joinGame(event) {
+    var gameId = event.target.getAttribute('data-gameid');
+
+    $.ajax({
+        type: 'POST',
+        url: '/api/game/' + gameId + '/players',
+        success: function(response) {
+            location.href = "/web/game.html?part=" + response.participationId;
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            alert("Error: " + jqXHR.responseJSON.error);
+        }
+    })
+}
 
 // This function creates a table using an array of players
 function displayLeaderBoard(players) {
@@ -60,4 +112,64 @@ function sortByTotalScore(a, b) {
     if (a.totalScore < b.totalScore) return 1;
     if (a.totalScore > b.totalScore) return -1;
     return 0;
+}
+
+// This function creates a list of all current games
+function displayGameList(data) {
+    var games = data.games;
+    var UserId = data.player.id;
+
+    // Creating html elements
+    var $listContainer = $('#game-list');
+    var $listOfGames = $('<ul/>');
+
+    $.each(games, function(i, obj) {
+        var $game = $('<li/>');
+        var gameId = games[i].id;
+        var gameDate = games[i].created;
+        var participations = games[i].participations;
+        var gameDefinition = 'Game ' + gameId + ', ' + gameDate + '. Players: ';
+        var userCanAccessGame = false;
+        var $linker;
+
+        // If a game has only one player, the User can join it
+        if (participations.length < 2) {
+            var userCanJoinGame = true;
+        } else {
+            var userCanJoinGame = false;
+        }
+
+        $.each(participations, function(i, obj) {
+            var participationId = participations[i].id;
+            var player = participations[i].player.email;
+            var playerId = participations[i].player.id;
+
+            // Showing player names(emails) in game description
+            if (i === 0) {
+                gameDefinition += player + ' & ';
+            } else {
+                gameDefinition += player;
+            }
+
+            // Checking if a game is played by the current User
+            if (playerId == UserId) {
+                $linker = $('<a href="/web/game.html?part=' + participationId + '">');
+                userCanAccessGame = true;
+            }
+
+        });
+        $game.append(gameDefinition);
+
+        // Assigning a link to the games the User can play or a button to the games the user can join
+        if (userCanAccessGame) {
+            $linker.append($game);
+            $listOfGames.append($linker);
+        } else if (userCanJoinGame) {
+            $game.append('<button class="joingame-button" data-gameId="' + gameId + '">Join Game</button>')
+            $listOfGames.append($game);
+        }
+
+    });
+
+    $listContainer.append($listOfGames);
 }

@@ -49,11 +49,6 @@ public class Game {
         creationDate =  DateUtil.getDateNowPlusHours(hours);
     }
 
-    @JsonIgnore
-    public Set<Participation> getParticipations() {
-        return participations;
-    }
-
 
     // Getters and Setters
     public long getId() {
@@ -64,9 +59,24 @@ public class Game {
         return creationDate;
     }
 
+    public Set<Score> getScores() {
+        return scores;
+    }
+
+    @JsonIgnore
+    public Set<Participation> getParticipations() {
+        return participations;
+    }
+
     public void setCreationDate(String creationDate) {
         this.creationDate = creationDate;
     }
 
+    public void setParticipations(Set<Participation> participations) {
+        this.participations = participations;
+    }
 
+    public void setScores(Set<Score> scores) {
+        this.scores = scores;
+    }
 }

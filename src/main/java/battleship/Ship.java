@@ -29,6 +29,10 @@ public class Ship {
     // Constructors
     public Ship() {}
 
+    public Ship(List<String> locations) {
+        this.locations = locations;
+    }
+
     public Ship(String type, List<String> locations) {
         this.type = type;
         this.locations = locations;

@@ -26,19 +26,89 @@ public class BattleshipController {
     @Autowired
     private PlayerRepository playerRepo;
 
-    // Put scores inside player -> score
+
     @RequestMapping("/games")
     public Map<String, Object> getPlayerGames(Authentication authentication) {
         Player player = playerRepo.findByUserName(authentication.getName());
+        List<Game> games = gameRepo.findAll();
 
         Map<String, Object> dto = new LinkedHashMap<>();
         dto.put("player", makePlayerDTO(player));
-        dto.put("games", player.getGames().stream().map(game -> makeGameDTO(game)).collect(Collectors.toList()));
+        dto.put("games", games.stream().map(game -> makeGameDTO(game)).collect(Collectors.toList()));
         return dto;
     }
 
+    /**
+     * This method responds to the request to create a new game.
+     * @param username String
+     * @return ResponseEntity
+     */
+    @RequestMapping(path = "/game", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> createGame(@RequestParam String username) {
+
+        Player player = playerRepo.findByUserName(username);
+
+        // Case No User
+        if (username.isEmpty() || player == null) {
+            return new ResponseEntity<>(makeResponse("error", "no user"), HttpStatus.UNAUTHORIZED);
+        }
+
+        // Case OK
+        Game game = new Game();
+        Participation part = new Participation(player, game);
+        gameRepo.save(game);
+        participationRepo.save(part);
+
+        return new ResponseEntity<>(makeResponse("participationId", part.getId()), HttpStatus.CREATED);
+    }
+
+    /**
+     * This method responds to the request to join a game.
+     * @param gameId long
+     * @param authentication Authentication
+     * @return ResponseEntity
+     */
+    @RequestMapping(path = "/game/{gameId}/players", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> joinGame(@PathVariable long gameId,
+                                                        Authentication authentication) {
+        // Getting the logged player and desired game
+        Player authenticatedPlayer = playerRepo.findByUserName(authentication.getName());
+        Game game = gameRepo.findById(gameId);
+
+        // Case No User
+        if (authenticatedPlayer == null) {
+            return new ResponseEntity<>(makeResponse("error", "no user"), HttpStatus.UNAUTHORIZED);
+        }
+
+        // Case No Game
+        if (game == null) {
+            return new ResponseEntity<>(makeResponse("error", "no such game"), HttpStatus.FORBIDDEN);
+        }
+
+        // Case Game is full
+        if (game.getParticipations().size() == 2) {
+            return new ResponseEntity<>(makeResponse("error", "game is full"), HttpStatus.FORBIDDEN);
+        }
+
+        // Case OK
+        Participation part = new Participation(authenticatedPlayer, game);
+        participationRepo.save(part);
+        return new ResponseEntity<>(makeResponse("participationId", part.getId()), HttpStatus.CREATED);
+    }
+
+    /**
+     * This method responds to a request to see a game view. It authorizes only the view of the games the user
+     * is playing.
+     * @param participationId long
+     * @param authentication Authentication
+     * @return ResponseEntity
+     */
     @RequestMapping("/game_view/{participationId}")
-    public Map<String, Object> getGameView(@PathVariable long participationId) {
+    public ResponseEntity<Map<String, Object>> getGameView(@PathVariable long participationId,
+                                                           Authentication authentication) {
+        // Getting the logged player
+        Player authenticatedPlayer = playerRepo.findByUserName(authentication.getName());
+
         Participation participation = participationRepo.findOne(participationId);
         Game game = participation.getGame();
         Set<Salvo> allSalvoes = new HashSet<>();
@@ -48,6 +118,8 @@ public class BattleshipController {
                 allSalvoes.add(salvo);
             }
         }
+
+        // Creating the Data Transfer Object
         Map<String, Object> dto = new LinkedHashMap<>();
         dto.put("id", game.getId());
         dto.put("created", game.getCreationDate());
@@ -57,10 +129,13 @@ public class BattleshipController {
                 .map(ship -> makeShipDTO(ship)).collect(Collectors.toList()));
         dto.put("salvoes", allSalvoes.stream()
                 .map(salvo -> makeSalvoDTO(salvo)).collect(Collectors.toList()));
-//        dto.put("salvoes2", game.getParticipations().stream()
-//                .map(part -> makeSalvoesByPlayerDTO(part)).collect(Collectors.toList()));
-//        dto.put("salvoes3", makeSalvoes3DTO(game));
-        return dto;
+
+        // Privacy Rules
+        if (authenticatedPlayer.getId() == participation.getPlayer().getId()) {
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(makeResponse("error", "Unauthorized"), HttpStatus.UNAUTHORIZED);
+        }
     }
 
     // The main difference between HashMap and LinkedHashMap is:
@@ -105,6 +180,31 @@ public class BattleshipController {
         return new ResponseEntity<>(makeResponse("username", username), HttpStatus.CREATED);
     }
 
+    @RequestMapping(path = "/games/players/{participationId}/ships", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> placeShips(Authentication authentication,
+                                                          @PathVariable long participationId,
+                                                          @RequestBody List<Ship> ships) {
+
+        Player authenticatedPlayer = playerRepo.findByUserName(authentication.getName());
+        Participation participation = participationRepo.findById(participationId);
+        Player participationPlayer = participation.getPlayer();
+
+        // Case no user logged, no participation or user is not participation's user
+        if (authenticatedPlayer == null || participation == null || participationPlayer != authenticatedPlayer) {
+            return new ResponseEntity<>(makeResponse("error", "unauthorized"), HttpStatus.UNAUTHORIZED);
+        }
+
+        // Case ships already placed
+        if (participation.getShips() != null) {
+            return new ResponseEntity<>(makeResponse("error", "ships already placed"), HttpStatus.FORBIDDEN);
+        }
+
+        // Case OK
+        // TODO Add ships to the participation and save them in the repo
+
+        return new ResponseEntity<>(makeResponse("Status", "Ships Placed"), HttpStatus.CREATED);
+    }
+
     private Map<String, Object> makeResponse(String key, Object value) {
         Map<String, Object> map = new HashMap<>();
         map.put(key, value);
@@ -123,7 +223,7 @@ public class BattleshipController {
     }
 
     private Map<String, Object> makeShipDTO(Ship ship) {
-        Map<String, Object> dto = new LinkedHashMap<String, Object>();
+        Map<String, Object> dto = new LinkedHashMap<>();
         dto.put("type", ship.getType());
         dto.put("location", ship.getLocations());
         return dto;

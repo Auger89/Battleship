@@ -48,12 +48,12 @@ nav {
     width: 300px;
 }
 
-.sign-btn {
+#sign-btn {
     display: flex;
     flex-flow: row nowrap;
     width: 150px;
-    padding: 8px;
-    margin: 8px;
+    /*padding: 8px;
+    margin: 8px;*/
 }
 
 .login-btn:hover {
@@ -166,10 +166,9 @@ p.salvo-turn {
     right: 1px;
 }
 
-#leaderBoard {
-    margin-top: 15px;
+#leaderBoard, #game-list {
+    margin-top: 10px;
     display: flex;
-    flex-flow: row nowrap;
     justify-content: center;
 }
 
@@ -184,7 +183,7 @@ thead {
 
 td {
     border: 2px solid #333;
-    padding: 15px;
+    padding: 12px;
     font-size: 20px;
     text-align: center;
 }
@@ -197,10 +196,10 @@ td {
     position: relative;
 }
 
-btn > img {
-    width: 30px;
-    height: 30px;
-    padding: 2px;
+button > img {
+    width: 25px;
+    height: 25px;
+    padding: 5px;
 }
 
 #container-form {
@@ -212,4 +211,30 @@ btn > img {
 
 button {
     font-family: 'VT323', monospace;
+}
+
+#game-list > ul {
+    list-style-type: none;
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 15px;
+    border: 2px solid #333;
+    min-width: 400px;
+}
+
+#game-list li {
+    padding: 5px 2px;
+}
+
+#game-list > ul > a:hover {
+    background-color: rgba(62, 195, 0, 0.80);
+}
+
+#user-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.joingame-button {
+    margin-left: 25px;
 }

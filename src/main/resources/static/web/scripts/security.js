@@ -1,15 +1,7 @@
-function showUser() {
-    $.ajax({
-        type: 'GET',
-        url: '/api/games',
-        success: function(data) {
-            var email = data.player.email;
-            manageLogin(true, email);
-        },
-        error: function() {
-            manageLogin(false);
-        }
-    });
+
+function showUser(data) {
+    var email = data.player.email;
+    manageLogin(true, email);
 }
 
 function signUp(event) {
@@ -26,7 +18,6 @@ function signUp(event) {
         success: function() {
             alert("Signed Up!");
             login(event, 'sign');
-            location.href = '/web/games.html';
         },
         error: function(jqXHR, textStatus, errorThrown) {
             alert("Error: " + jqXHR.responseJSON.error);
@@ -44,9 +35,9 @@ function login(event, form) {
             username: formArray[0].value,
             password: formArray[1].value
         },
-        success: function() {
+        success: function(jqXHR) {
             alert("Logged In!");
-            showUser();
+            location.href = '/web/games.html';
         },
         error: function(jqXHR, textStatus, errorThrown) {
             console.log(jqXHR);
@@ -71,16 +62,23 @@ function manageLogin(logged, email) {
     var $login = $('#login-form');
     var $logout = $('#logout-form');
     var $user = $('#user');
+    var $userContent = $('#user-content');
+    var $signBtn = $('#sign-btn');
     $user.empty();
+
     if (email) $user.append('<p>' + email + '</p>');
 
     if (logged) {
         $login.css("display", "none");
+        $signBtn.css("display", "none");
         $user.css("display", "flex");
         $logout.css("display", "block");
+        $userContent.css("display", "flex");
     } else {
         $logout.css("display", "none");
         $user.css("display", "none");
+        $userContent.css("display", "none");
         $login.css("display", "flex");
+        $signBtn.css("display", "flex");
     }
 }
