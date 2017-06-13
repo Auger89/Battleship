@@ -154,6 +154,7 @@ function displayGameList(data) {
             // Checking if a game is played by the current User
             if (playerId == UserId) {
                 $linker = $('<a href="/web/game.html?part=' + participationId + '">');
+                $returnButton = $('<button class="joingame-button" data-gameId="' + gameId + '">Join Game</button>')
                 userCanAccessGame = true;
             }
 

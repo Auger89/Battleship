@@ -32,10 +32,14 @@ $(document).ready(function() {
         }
     });
 
-    // Listening to Logout button
+    // Listening to buttons
     $('#logout-button').click(function(event) {
             logout(event);
-        });
+     });
+
+     $('#ship-button').click(function() {
+        placeShips(parameter);
+     });
 });
 
 // This function creates the main Grid with divs and fills every cell with an image
@@ -194,26 +198,18 @@ function displayHorizontalShip(locations) {
         var coord = locations[j].toLowerCase();
         if (j === 0 || j === locations.length - 1) {
             // If we are adding the ship's front or end
-            var img = "ship-end";
+            var img = "ship-end-hor";
             var imgDiv = $('<img src="assets/images/' + img + '.png">');
             $('#' + coord).append(imgDiv);
 
-            // Rotating the image
-            if (j === 0) {
-                // Front
-                imgDiv.css("transform", "rotate(270deg)");
-            } else {
-                // End
-                imgDiv.css("transform", "rotate(90deg)");
-            }
+            // Rotating the image if it's the ship's end
+            if (j != 0) imgDiv.css("transform", "rotate(180deg)");
 
         } else {
             // If we are adding the middle parts of the sip
-            var img = "ship-mid";
+            var img = "ship-mid-hor";
             var imgDiv = $('<img src="assets/images/' + img + '.png">');
             $('#' + coord).append(imgDiv);
-            // Rotating the image
-            imgDiv.css("transform", "rotate(90deg)");
         }
     }
 
@@ -225,7 +221,7 @@ function displayVerticalShip(locations) {
         var coord = locations[j].toLowerCase();
         if (j === 0 || j === locations.length - 1) {
            // If we are adding the ship's front or end
-           var img = "ship-end";
+           var img = "ship-end-ver";
            var imgDiv = $('<img src="assets/images/' + img + '.png">');
            $('#' + coord).append(imgDiv);
 
@@ -234,7 +230,7 @@ function displayVerticalShip(locations) {
 
         } else {
            // If we are adding the middle parts of the sip
-           var img = "ship-mid";
+           var img = "ship-mid-ver";
            var imgDiv = $('<img src="assets/images/' + img + '.png">');
            $('#' + coord).append(imgDiv);
         }
@@ -328,3 +324,43 @@ function getParameterByName(name, url) {
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
+
+// TODO make the function placeShips to get type and locations of every ship and post them to back-end
+function placeShips(participationId) {
+    $.ajax({
+        type: 'POST',
+        url: '/api/games/players/' + participationId + '/ships',
+        data: JSON.stringify([
+            {
+                type: "patrol boat",
+                locations: ["H3", "H4"]
+            },
+            {
+                type: "submarine",
+                locations: ["A9", "B9", "C9"]
+            },
+            {
+                type: "destroyer",
+                locations: ["J7", "J8", "J9"]
+            },
+            {
+                type: "battleShip",
+                locations: ["C2", "D2", "E2", "F2"]
+            },
+            {
+                type: "carrier",
+                locations: ["B2", "B3", "B4", "B5", "B6"]
+            }
+        ]),
+        contentType: "application/json",
+        success: function(response) {
+            alert(response.status);
+            location.reload();
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            alert("Error: " + jqXHR.responseJSON.error);
+        }
+    });
+}
+
+

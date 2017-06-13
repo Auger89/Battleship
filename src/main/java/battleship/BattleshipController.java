@@ -26,6 +26,9 @@ public class BattleshipController {
     @Autowired
     private PlayerRepository playerRepo;
 
+    @Autowired
+    private ShipRepository shipRepo;
+
 
     @RequestMapping("/games")
     public Map<String, Object> getPlayerGames(Authentication authentication) {
@@ -195,14 +198,18 @@ public class BattleshipController {
         }
 
         // Case ships already placed
-        if (participation.getShips() != null) {
+        if (participation.getShips().size() > 0) {
             return new ResponseEntity<>(makeResponse("error", "ships already placed"), HttpStatus.FORBIDDEN);
         }
 
         // Case OK
-        // TODO Add ships to the participation and save them in the repo
+        ships.stream().forEach(ship -> saveShip(ship, participation));
+        return new ResponseEntity<>(makeResponse("status", "Ships Placed"), HttpStatus.CREATED);
+    }
 
-        return new ResponseEntity<>(makeResponse("Status", "Ships Placed"), HttpStatus.CREATED);
+    private void saveShip(Ship newShip, Participation participation) {
+        participation.addShip(newShip);
+        shipRepo.save(newShip);
     }
 
     private Map<String, Object> makeResponse(String key, Object value) {
