@@ -1,4 +1,9 @@
-// http://localhost:8080/web/game.html?part=1
+
+// GLOBAL VARIABLES
+var globalObject = {
+    participationId: getParameterByName("part"),
+    ships: []
+}
 
 $(document).ready(function() {
 
@@ -14,17 +19,15 @@ $(document).ready(function() {
         }
     });
 
-    var parameter = getParameterByName("part");
+    var parameter = globalObject.participationId;
+    // Displaying the entire page
     $.ajax({
         // We don't need to specify type:'GET' because it is the default value
         type: 'GET',
         url: '/api/game_view/' + parameter,
         success: function(data) {
-            displayGrid('ship');
-            displayGrid('salvo');
             showPlayers(data, parameter);
-            displayAllShips(data);
-            displaySalvoes(data, parameter);
+            manageGameZone(data);
         },
         error: function(jqXHR, textStatus, errorThrown) {
             alert("Error: " + jqXHR.responseJSON.error);
@@ -37,9 +40,16 @@ $(document).ready(function() {
             logout(event);
      });
 
-     $('#ship-button').click(function() {
-        placeShips(parameter);
-     });
+    $('#restart').click(reload);
+
+    $('#send').click(function() {
+        if (globalObject.ships.length == 5) {
+            placeShips(globalObject.participationId);
+        } else {
+            alert("You need to place 5 ships!!");
+        }
+
+    });
 });
 
 // This function creates the main Grid with divs and fills every cell with an image
@@ -52,7 +62,23 @@ function displayGrid(type) {
 
         // Creating all the tiles in the rows
         for (var j=-1; j<12; j++) {
-            tile = $('<div class="tile"></div>');
+
+            // Setting the droppable tiles
+            if (type == "ship") {
+                if ( (j<=0 || i<=0) || (j>10 || i>10) ) {
+                    var tile = $('<div class="tile"></div>');
+                } else {
+                    var tile = $('<div class="tile"></div>')
+                        .droppable({
+                            accept: '.ship',
+                            hoverClass: 'hovered',
+                            tolerance: 'pointer',
+                            drop: dropShip
+                        });
+                }
+            } else {
+                var tile = $('<div class="tile"></div>');
+            }
 
             // Setting id's for each tile
             if (type == "ship") {
@@ -80,6 +106,21 @@ function displayGrid(type) {
         }
 
     }
+}
+
+function manageGameZone(data) {
+    displayGrid('ship');
+    displayGrid('salvo');
+
+    if (data.ships.length === 0) {
+        $('#salvo-grid').hide();
+        makeShipsDraggable();
+    } else {
+        $('#ships-container').hide();
+        displayAllShips(data);
+        displaySalvoes(data, globalObject.participationId);
+    }
+
 }
 
 function displayGridCoords(id, alphanumeric) {
@@ -325,33 +366,11 @@ function getParameterByName(name, url) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
-// TODO make the function placeShips to get type and locations of every ship and post them to back-end
 function placeShips(participationId) {
     $.ajax({
         type: 'POST',
         url: '/api/games/players/' + participationId + '/ships',
-        data: JSON.stringify([
-            {
-                type: "patrol boat",
-                locations: ["H3", "H4"]
-            },
-            {
-                type: "submarine",
-                locations: ["A9", "B9", "C9"]
-            },
-            {
-                type: "destroyer",
-                locations: ["J7", "J8", "J9"]
-            },
-            {
-                type: "battleShip",
-                locations: ["C2", "D2", "E2", "F2"]
-            },
-            {
-                type: "carrier",
-                locations: ["B2", "B3", "B4", "B5", "B6"]
-            }
-        ]),
+        data: JSON.stringify(globalObject.ships),
         contentType: "application/json",
         success: function(response) {
             alert(response.status);
@@ -363,4 +382,151 @@ function placeShips(participationId) {
     });
 }
 
+// --- JQUERY UI DRAG & DROP SECTION ---
+
+function makeShipsDraggable() {
+
+	$('.ship').draggable({
+	  	// containment set the limit zone which the draggable element can't leave
+		containment: '.dragzone',
+	  	// cursor option changes the cursor display when dragging
+	  	cursor: 'move',
+		// Brings dragged item to the front
+		stack: '.ships-container',
+	  	// revert true returns the draggable element to his initial 'div' when incorrect dropping
+	  	revert: true
+	});
+
+}
+
+function dropShip(event, ui) {
+
+	// getting ship data
+	var dShip = ui.draggable;
+	var position = dShip.data("position");
+	var length = dShip.data("length");
+	var shipType = dShip.data("type");
+
+	// getting tile ID
+	var tileId = $(this).attr("id");
+
+	if (shipCanBeDropped(tileId, position, length)){
+		// Making ship undraggable and tile undroppable
+		dShip.draggable('disable');
+		$(this).droppable('disable');
+
+		// positioning the ship
+		dShip.position( { of: $(this), my: 'left top', at: 'left top' } );
+
+
+		makeTilesUndroppable(tileId, position, length);
+
+		// this line drops the element to the current droppable element
+		dShip.draggable('option', 'revert', 'false');
+
+		// eliminating other direction of the ship
+		removeShip(dShip);
+
+		// Adding ships to the Ships Object
+		var locationsArray = getShipLocations(tileId, position, length);
+		var actualShip = {
+			type: shipType,
+			locations: locationsArray
+		}
+		globalObject.ships.push(actualShip);
+	}
+
+}
+
+function shipCanBeDropped(tileId, position, length) {
+
+	var num = parseInt(tileId.substring(1));
+	var char = tileId.substring(0,1);
+
+	if (position == "hor") {
+		for (var i=0; i<length - 1; i++) {
+			num += 1;
+			var id = char + num;
+
+			var isDroppable = $('#' + id).hasClass('ui-droppable');
+			var droppableDisabled = $('#' + id).hasClass('ui-droppable-disabled');
+
+			if (!isDroppable || droppableDisabled) return false;
+		}
+	} else if (position == "ver") {
+		for (var i=0; i<length - 1; i++) {
+			char = nextChar(char);
+			var id = char + num;
+
+			var isDroppable = $('#' + id).hasClass('ui-droppable');
+			var droppableDisabled = $('#' + id).hasClass('ui-droppable-disabled');
+
+			if (!isDroppable || droppableDisabled) return false;
+		}
+	}
+
+	return true;
+}
+
+function makeTilesUndroppable(tileId, position, length) {
+
+	var num = parseInt(tileId.substring(1));
+	var char = tileId.substring(0,1);
+
+	if (position == "hor") {
+		for (var i=0; i<length - 1; i++) {
+			num += 1;
+			var id = char + num;
+			$('#' + id).droppable('disable');
+		}
+	} else if (position == "ver") {
+		for (var i=0; i<length - 1; i++) {
+			char = nextChar(char);
+			var id = char + num;
+			$('#' + id).droppable('disable');
+		}
+	}
+
+}
+
+function getShipLocations(id, position, length) {
+	var num = parseInt(id.substring(1));
+	var char = id.substring(0,1);
+	var locations = [];
+
+	if (position == "hor") {
+		for (var i=0; i<length; i++) {
+			var id = char + num;
+			locations.push(id);
+			num += 1;
+		}
+	} else if (position == "ver") {
+		for (var i=0; i<length; i++) {
+			var id = char + num;
+			locations.push(id);
+			char = nextChar(char);
+		}
+	}
+	return locations;
+}
+
+function removeShip(ship) {
+	var shipId = ship.attr('id');
+	var direction = shipId.substring(shipId.length - 1, shipId.length);
+	var simpleId = shipId.substring(0, shipId.length - 1);
+
+	if (direction == "v") {
+		$('#' + simpleId + "h").hide();
+	} else {
+		$('#' + simpleId + "v").hide();
+	}
+}
+
+function reload() {
+	location.reload();
+}
+
+function nextChar(c) {
+    return String.fromCharCode(c.charCodeAt(0) + 1);
+}
 

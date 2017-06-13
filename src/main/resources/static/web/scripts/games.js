@@ -154,7 +154,7 @@ function displayGameList(data) {
             // Checking if a game is played by the current User
             if (playerId == UserId) {
                 $linker = $('<a href="/web/game.html?part=' + participationId + '">');
-                $returnButton = $('<button class="joingame-button" data-gameId="' + gameId + '">Join Game</button>')
+//                $returnButton = $('<a href="/web/game.html?part=' + participationId + '"><button class="playgame-button">Play Game</button></a>');
                 userCanAccessGame = true;
             }
 
@@ -163,6 +163,8 @@ function displayGameList(data) {
 
         // Assigning a link to the games the User can play or a button to the games the user can join
         if (userCanAccessGame) {
+//            $game.append($returnButton);
+//            $listOfGames.append($game);
             $linker.append($game);
             $listOfGames.append($linker);
         } else if (userCanJoinGame) {

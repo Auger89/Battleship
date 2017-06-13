@@ -27,16 +27,68 @@
     <h1>BATTLESHIP!</h1>
     <h2 id="players"></h2>
 
-    <div class="flex-row">
+    <div id="dragzone">
+
         <div id="ship-grid"></div>
-        <div>
-            <button id="ship-button">Place Ships</button>
-        </div>
+
         <div id="salvo-grid"></div>
+
+        <div id="ships-container">
+            <div class="type-container">
+                <div id="boath-container" class="img-cont">
+                    <img id="boat-h" class="ship horizontal" data-type="patrol boat" data-position="hor" data-length="2" src="/web/assets/images/patrolboat-h.png" alt="patrol boat">
+                </div>
+
+                <div id="boatv-container" class="img-cont">
+                    <img id="boat-v" class="ship vertical" data-type="patrol boat" data-position="ver" data-length="2" src="/web/assets/images/patrolboat-v.png" alt="patrol boat">
+                </div>
+            </div>
+            <div class="type-container">
+                <div id="destroyerh-container" class="img-cont">
+                    <img id="destroyer-h" class="ship horizontal" data-type="destroyer" data-position="hor" data-length="3" src="/web/assets/images/destroyer-h.png" alt="destroyer">
+                </div>
+                <div id="destroyerv-container" class="img-cont">
+                    <img id="destroyer-v" class="ship vertical" data-type="destroyer" data-position="ver" data-length="3" src="/web/assets/images/destroyer-v.png" alt="destroyer">
+                </div>
+            </div>
+            <div class="type-container">
+                <div id="submarineh-container" class="img-cont">
+                    <img id="submarine-h" class="ship horizontal" data-type="submarine" data-position="hor" data-length="3" src="/web/assets/images/destroyer-h.png" alt="destroyer">
+                </div>
+                <div id="submarinev-container" class="img-cont">
+                    <img id="submarine-v" class="ship vertical" data-type="submarine" data-position="ver" data-length="3" src="/web/assets/images/destroyer-v.png" alt="destroyer">
+                </div>
+            </div>
+            <div class="type-container">
+                <div id="battleshiph-container" class="img-cont">
+                    <img id="bship-h" class="ship horizontal" data-type="battleship" data-position="hor" data-length="4" src="/web/assets/images/battleship-h.png" alt="battleship">
+                </div>
+                <div id="battleshipv-container" class="img-cont">
+                    <img id="bship-v" class="ship vertical" data-type="battleship" data-position="ver" data-length="4" src="/web/assets/images/battleship-v.png" alt="battleship">
+                </div>
+            </div>
+            <div class="type-container">
+                <div id="carrierh-container" class="img-cont">
+                    <img id="carrier-h" class="ship horizontal" data-type="carrier" data-position="hor" data-length="5" src="/web/assets/images/carrier-h.png" alt="carrier">
+                </div>
+                <div id="carrierv-container" class="img-cont">
+                    <img id="carrier-v" class="ship vertical" data-type="carrier" data-position="ver" data-length="5" src="/web/assets/images/carrier-v.png" alt="carrier">
+                </div>
+            </div>
+
+            <div>
+                <button id="restart">RESTART</button>
+                <button id="send">DONE</button>
+            </div>
+        </div>
+
     </div>
 
     <!--jQuery-->
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <!--jQuery UI-->
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+    <!--Scripts-->
     <script src="scripts/security.js"></script>
     <script src="scripts/game.js"></script>
 </body>

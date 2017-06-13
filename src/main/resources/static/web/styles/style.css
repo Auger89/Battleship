@@ -146,17 +146,6 @@ h2 {
     justify-content: space-around;
 }
 
-#ship-grid, #salvo-grid {
-    box-sizing: border-box;
-    width: 416px;
-    min-width: 416px;
-    margin: 0 auto;
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: flex-start;
-    box-shadow: 3px 3px 1px #333;
-}
-
 p.salvo-turn {
     position: absolute;
     top: 7px;
@@ -244,3 +233,110 @@ button {
 .joingame-button {
     margin-left: 25px;
 }
+
+/* GRID SECTION */
+
+#ship-grid, #salvo-grid {
+    box-sizing: border-box;
+    width: 416px;
+    min-width: 416px;
+    margin: 0 auto;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    box-shadow: 3px 3px 1px #333;
+}
+
+
+/* --- DRAG & DROP SECTION --- */
+
+#dragzone {
+	display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+#ships-container {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: flex-start;
+	align-items: center;
+	width: 400px;
+}
+
+.type-container {
+	background-color: rgba(200, 200, 160, 0.9);
+	border: 1px solid #333;
+	height: 175px;
+}
+
+#boath-container {
+	height: 70px;
+	width: 64px;
+}
+
+#boatv-container {
+	height: 70px;
+	width: 32px;
+}
+
+#destroyerh-container {
+	height: 102px;
+	width: 96px;
+}
+
+#destroyerv-container {
+	height: 102px;
+	width: 32px;
+}
+
+#submarineh-container {
+	height: 102px;
+	width: 96px;
+}
+
+#submarinev-container {
+	height: 102px;
+	width: 32px;
+}
+
+#battleshiph-container {
+	height: 134px;
+	width: 128px;
+}
+#battleshipv-container {
+	height: 134px;
+	width: 32px;
+}
+
+#carrierh-container {
+	height: 166px;
+	width: 160px;
+}
+
+#carrierv-container {
+	height: 166px;
+	width: 32px;
+}
+
+.img-cont {
+	float: left;
+}
+
+.hovered {
+	background: gold !important;
+	animation: blinker 1s linear infinite;
+}
+
+/* Describing the animation */
+@keyframes blinker {
+	50% {
+		background: #156C99;
+	}
+}
+
+/*
+grid main colors:
+water blue = #156C99
+grass green = #2F8136
+*/
