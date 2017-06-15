@@ -247,6 +247,9 @@ button {
     box-shadow: 3px 3px 1px #333;
 }
 
+#send-salvos {
+    display: none;
+}
 
 /* --- DRAG & DROP SECTION --- */
 

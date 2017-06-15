@@ -1,8 +1,12 @@
-
 // GLOBAL VARIABLES
-var globalObject = {
+var global = {
     participationId: getParameterByName("part"),
-    ships: []
+    ships: [],
+    shotsFired: 1,
+    salvo: {
+        turnNumber: 0,
+        locations: []
+    }
 }
 
 $(document).ready(function() {
@@ -19,7 +23,7 @@ $(document).ready(function() {
         }
     });
 
-    var parameter = globalObject.participationId;
+    var parameter = global.participationId;
     // Displaying the entire page
     $.ajax({
         // We don't need to specify type:'GET' because it is the default value
@@ -43,13 +47,14 @@ $(document).ready(function() {
     $('#restart').click(reload);
 
     $('#send').click(function() {
-        if (globalObject.ships.length == 5) {
-            placeShips(globalObject.participationId);
+        if (global.ships.length == 5) {
+            placeShips(global.participationId);
         } else {
             alert("You need to place 5 ships!!");
         }
-
     });
+
+    $('#send-salvos').click(sendSalvos);
 });
 
 // This function creates the main Grid with divs and fills every cell with an image
@@ -77,7 +82,11 @@ function displayGrid(type) {
                         });
                 }
             } else {
-                var tile = $('<div class="tile"></div>');
+                if ( (j<=0 || i<=0) || (j>10 || i>10) ) {
+                    var tile = $('<div class="tile"></div>');
+                } else {
+                    var tile = $('<div class="tile salvo"></div>');
+                }
             }
 
             // Setting id's for each tile
@@ -111,16 +120,22 @@ function displayGrid(type) {
 function manageGameZone(data) {
     displayGrid('ship');
     displayGrid('salvo');
+    var shipsArePlaced = (data.ships.length > 0) ? true : false;
 
-    if (data.ships.length === 0) {
-        $('#salvo-grid').hide();
-        makeShipsDraggable();
-    } else {
+    // Setting the Salvo Turn
+    global.salvo.turnNumber = data.salvoes.length + 1;
+
+    if (shipsArePlaced) {
         $('#ships-container').hide();
+        $('#send-salvos').show();
         displayAllShips(data);
-        displaySalvoes(data, globalObject.participationId);
+        displaySalvoes(data, global.participationId);
+        allowSalvoes();
+    } else {
+        $('#salvo-grid').hide();
+        $('#send-salvos').hide();
+        makeShipsDraggable();
     }
-
 }
 
 function displayGridCoords(id, alphanumeric) {
@@ -304,7 +319,8 @@ function displaySalvoes(data, participationId) {
     var explosionImage = '<img class="salvo-img" src="assets/images/salvo1.png">';
     var PlayerShipsArray = getPlayerShips(data);
     var PlayerSalvoesArray = [];
-    // Iterating through salvoes array
+
+    // Iterating through salvos array
     for (var i=0; i<salvoes.length; i++) {
         var salvoLocations = salvoes[i].locations;
         var turnNumber = salvoes[i].turn;
@@ -317,8 +333,13 @@ function displaySalvoes(data, participationId) {
                 // Showing salvo (explosion image) in the right tile if there's no salvo already
                 // children() function returns an array of elements inside the element which function is called
                 if ( PlayerSalvoesArray.indexOf(coord) == -1 ) {
+                    // Showing the salvo and the turn number
                     $('#s' + coord).append(explosionImage);
                     $('#s' + coord).append('<p class="salvo-turn">' + turnNumber + '</p>');
+
+                    // Disabling the tile from being fired again
+                    $('#s' + coord).removeClass("salvo");
+
                     PlayerSalvoesArray.push(coord);
                 }
             }
@@ -370,7 +391,7 @@ function placeShips(participationId) {
     $.ajax({
         type: 'POST',
         url: '/api/games/players/' + participationId + '/ships',
-        data: JSON.stringify(globalObject.ships),
+        data: JSON.stringify(global.ships),
         contentType: "application/json",
         success: function(response) {
             alert(response.status);
@@ -382,7 +403,68 @@ function placeShips(participationId) {
     });
 }
 
-// --- JQUERY UI DRAG & DROP SECTION ---
+// This function enables firing salvos when the user has placed his ships
+function allowSalvoes() {
+    $salvo = $('.salvo');
+
+    $salvo.hover(function() {
+        $(this).addClass('hovered');
+    }, function() {
+        $(this).removeClass('hovered');
+    });
+
+    $salvo.click(function() {
+        var tileIsFired = $(this).data('isfired');
+
+        if (tileIsFired) {
+            // Removing the targets (tiles to fire) and enabling another shot
+            $(this).empty();
+            global.shotsFired --;
+
+            // Remove the location from our salvo object
+            var id = $(this).attr("id");
+            var location = id.substring(1);
+            var index = global.salvo.locations.indexOf(location);
+            global.salvo.locations.splice(index, 1);
+
+            // Setting this tile as an unfired fired tile
+            $(this).data('isfired', false);
+            console.log(global.salvo.locations);
+
+        } else if ( (!tileIsFired) && (global.shotsFired <= 5) ) {
+            // Showing the targets (tiles to fire) and preventing to fire more than 5 shots
+            $(this).append($('<img src="/web/assets/images/target2.png">'));
+            global.shotsFired ++;
+
+            // Save the locations in our salvo object
+            var id = $(this).attr("id");
+            var location = id.substring(1);
+            global.salvo.locations.push(location);
+
+            // Setting this tile as a fired tile
+            $(this).data('isfired', true);
+            console.log(global.salvo.locations);
+        }
+    });
+}
+
+function sendSalvos() {
+    $.ajax({
+        type: 'POST',
+        url: '/api/games/players/' + global.participationId + '/salvos',
+        data: JSON.stringify(global.salvo),
+        contentType: "application/json",
+        success: function(response) {
+            alert(response.status);
+            location.reload();
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            alert("Error: " + jqXHR.responseJSON.error);
+        }
+    });
+}
+
+// ----- JQUERY UI DRAG & DROP SECTION -----
 
 function makeShipsDraggable() {
 
@@ -433,7 +515,7 @@ function dropShip(event, ui) {
 			type: shipType,
 			locations: locationsArray
 		}
-		globalObject.ships.push(actualShip);
+		global.ships.push(actualShip);
 	}
 
 }
@@ -529,4 +611,3 @@ function reload() {
 function nextChar(c) {
     return String.fromCharCode(c.charCodeAt(0) + 1);
 }
-

@@ -29,6 +29,9 @@ public class BattleshipController {
     @Autowired
     private ShipRepository shipRepo;
 
+    @Autowired
+    private SalvoRepository salvoRepo;
+
 
     @RequestMapping("/games")
     public Map<String, Object> getPlayerGames(Authentication authentication) {
@@ -205,6 +208,32 @@ public class BattleshipController {
         // Case OK
         ships.stream().forEach(ship -> saveShip(ship, participation));
         return new ResponseEntity<>(makeResponse("status", "Ships Placed"), HttpStatus.CREATED);
+    }
+
+    @RequestMapping(path = "/games/players/{participationId}/salvos", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> sendSalvos(Authentication authentication,
+                                                          @PathVariable long participationId,
+                                                          @RequestBody Salvo salvo) {
+
+        Player authenticatedPlayer = playerRepo.findByUserName(authentication.getName());
+        Participation participation = participationRepo.findById(participationId);
+        Player participationPlayer = participation.getPlayer();
+
+        // Case no user logged, no participation or user is not participation's user
+        if (authenticatedPlayer == null || participation == null || participationPlayer != authenticatedPlayer) {
+            return new ResponseEntity<>(makeResponse("error", "unauthorized"), HttpStatus.UNAUTHORIZED);
+        }
+
+        // Case salvos already sent in that turn
+        if (participation.getSalvoes().size() >= salvo.getTurnNumber()) {
+            return new ResponseEntity<>(makeResponse("error", "salvos already sent in that turn"), HttpStatus.FORBIDDEN);
+        }
+
+        // Case OK
+        participation.addSalvo(salvo);
+        salvoRepo.save(salvo);
+        return new ResponseEntity<>(makeResponse("status", "Salvos sent"), HttpStatus.CREATED);
+
     }
 
     private void saveShip(Ship newShip, Participation participation) {
